@@ -9,14 +9,14 @@ type SavedMeal = { meal_id: string; meal_name: string; meal_thumb: string };
 
 export default function SavedPage() {
   const [items, setItems] = useState<SavedMeal[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isSupabaseConfigured);
   const [configured] = useState(isSupabaseConfigured());
   const [signedIn, setSignedIn] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
-    if (!supabase) { setLoading(false); return; }
+    if (!supabase) return;
     let active = true;
     async function refresh() {
       const { data: { user } } = await supabase!.auth.getUser();

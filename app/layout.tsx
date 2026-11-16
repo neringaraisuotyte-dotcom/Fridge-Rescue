@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="lt">
+    <html lang="lt" data-scroll-behavior="smooth">
       <body>
         <header className="site-header">
           <Link href="/" className="brand" aria-label="Fridge Rescue — pradžia">
