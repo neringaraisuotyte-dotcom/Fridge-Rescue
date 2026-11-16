@@ -1,0 +1,17 @@
+Time 2026-11-16T07:47:17.8985519Z
+Commit 00000018 390958 keys in 20ms 996µs
+FAM | META SEQ | SST SEQ         | RANGE
+  0 | 00000015 | 00000014 SST    |                                                                             O                        | c44bdff4074eecdb-c44bdff4074eecdb (0 MiB, fresh, 38 bytes, 1 entries, 0 tombstones)
+  3 | 00000016 | 00000006 SST    | [==================================================================================================] | 0000b14f07e85424-ffffe71cce52c59f (1 MiB, fresh, 1570077 bytes, 130319 entries, 0 tombstones)
+  1 | 00000017 | 00000001 SST    | [=======================]                                                                            | 000162bda900bf14-3ffefbc09c358f7b (1 MiB, fresh, 1666787 bytes, 32567 entries, 0 tombstones)
+  1 | 00000017 | 00000007 SST    |                          [=======================]                                                   | 40006784a00f6415-7fff898d608ce952 (1 MiB, fresh, 1673106 bytes, 32331 entries, 0 tombstones)
+  1 | 00000017 | 00000008 SST    |                                                   [=======================]                          | 80000d88d69befb1-bfff8d1947f12603 (1 MiB, fresh, 1752735 bytes, 32729 entries, 0 tombstones)
+  1 | 00000017 | 00000009 SST    |                                                                            [=======================] | c0002f8f2f9a1a05-fffec925b18eeb5e (1 MiB, fresh, 1716984 bytes, 32692 entries, 0 tombstones)
+  2 | 00000018 | 00000004 SST    |                                                   [===========]                                      | 80000d88d69befb1-9fffe987c68ef020 (2 MiB, fresh, 2351634 bytes, 16275 entries, 0 tombstones)
+  2 | 00000018 | 00000005 SST    |                                                                            [===========]             | c0002f8f2f9a1a05-dfff17daaafff866 (2 MiB, fresh, 2631101 bytes, 16467 entries, 0 tombstones)
+  2 | 00000018 | 00000003 SST    |                          [===========]                                                               | 40006784a00f6415-5ffff1e4aa20885f (2 MiB, fresh, 3107024 bytes, 16097 entries, 0 tombstones)
+  2 | 00000018 | 00000002 SST    | [===========]                                                                                        | 000162bda900bf14-1fff3126ecb74ef2 (3 MiB, fresh, 3404532 bytes, 16295 entries, 0 tombstones)
+  2 | 00000018 | 00000010 SST    |                                                               [===========]                          | a000087685e44c9d-bfff8d1947f12603 (2 MiB, fresh, 2875866 bytes, 16454 entries, 0 tombstones)
+  2 | 00000018 | 00000012 SST    |                                      [===========]                                                   | 600001c992b8ca51-7fff898d608ce952 (2 MiB, fresh, 2539870 bytes, 16234 entries, 0 tombstones)
+  2 | 00000018 | 00000013 SST    |             [===========]                                                                            | 20015b66a8a18f5a-3ffefbc09c358f7b (2 MiB, fresh, 2906363 bytes, 16272 entries, 0 tombstones)
+  2 | 00000018 | 00000011 SST    |                                                                                        [===========] | e0007849199e644d-fffec925b18eeb5e (3 MiB, fresh, 3507905 bytes, 16225 entries, 0 tombstones)

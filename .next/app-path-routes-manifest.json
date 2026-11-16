@@ -1,0 +1,11 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/account/page": "/account",
+  "/api/meals/[id]/route": "/api/meals/[id]",
+  "/api/meals/search/route": "/api/meals/search",
+  "/api/recipes/adapt/route": "/api/recipes/adapt",
+  "/page": "/",
+  "/recipes/[id]/page": "/recipes/[id]",
+  "/saved/page": "/saved"
+}
