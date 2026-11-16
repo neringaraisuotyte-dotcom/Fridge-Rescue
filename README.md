@@ -29,7 +29,7 @@ Email and password sign-up/sign-in are provided by Supabase Auth. If email confi
 1. Create an API key in your OpenRouter account.
 2. Set `OPENROUTER_API_KEY` in `.env.local`. This is a server-only secret; never prefix it with `NEXT_PUBLIC_` or commit it.
 3. Optionally set `OPENROUTER_MODEL` to a model available in your OpenRouter account. If omitted, the server uses `openrouter/auto`.
-4. Homepage AI help and recipe adaptation require a signed-in Supabase user. The server verifies the user's access token before sending the question, ingredients, or recipe to OpenRouter.
+4. Homepage AI help and recipe adaptation require a signed-in Supabase user. The server verifies the user's access token before sending the question, ingredients, or recipe to OpenRouter. On a recipe page, the adaptation form sends the selected recipe's ID, name, ingredients, and original instructions automatically with the user's situation.
 
 ## Where requests run
 

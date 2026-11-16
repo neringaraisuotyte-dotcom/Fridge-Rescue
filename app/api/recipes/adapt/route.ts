@@ -15,16 +15,20 @@ export async function POST(request: NextRequest) {
   const { data: { user }, error: authError } = await supabase.auth.getUser(accessToken);
   if (authError || !user) return NextResponse.json({ error: "Sesija nebegalioja. Prisijunk iš naujo." }, { status: 401 });
 
-  let body: { meal?: Meal; request?: string };
+  let body: { meal?: Meal; request?: unknown };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Netaisyklinga užklausa." }, { status: 400 });
   }
   const meal = body.meal;
-  const instruction = body.request?.trim();
-  if (!meal?.strMeal || !Array.isArray(getIngredients(meal)) || !instruction || instruction.length > 500) {
+  const instruction = typeof body.request === "string" ? body.request.trim() : "";
+  if (!meal || typeof meal.idMeal !== "string" || typeof meal.strMeal !== "string" || typeof meal.strInstructions !== "string" || !instruction || instruction.length > 500) {
     return NextResponse.json({ error: "Pateik receptą ir trumpą pritaikymo prašymą (iki 500 simbolių)." }, { status: 400 });
+  }
+  const ingredients = getIngredients(meal);
+  if (!ingredients.length || !meal.strInstructions.trim()) {
+    return NextResponse.json({ error: "Pasirinktas receptas neturi ingredientų arba gaminimo instrukcijos." }, { status: 400 });
   }
 
   try {
@@ -33,10 +37,10 @@ export async function POST(request: NextRequest) {
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json", "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000", "X-Title": "Fridge Rescue" },
       body: JSON.stringify({
         model: process.env.OPENROUTER_MODEL || "openrouter/auto",
-        max_tokens: 900,
+        max_tokens: 1600,
         messages: [
-          { role: "system", content: "Esi Fridge Rescue virtuvės asistentas. Lietuviškai pasiūlyk praktišką pateikto recepto pritaikymą pagal vartotojo prašymą. Išlaikyk aiškų formatą: trumpas paaiškinimas, pakeisti ingredientai ir jų kiekiai, gaminimo veiksmai. Jei prašymas susijęs su alergija, aiškiai perspėk patikrinti produktų etiketes ir kryžminę taršą. Neteik medicininių garantijų." },
-          { role: "user", content: JSON.stringify({ recipe: { name: meal.strMeal, ingredients: getIngredients(meal), instructions: meal.strInstructions?.slice(0, 5000) }, adaptation_request: instruction }) },
+          { role: "system", content: "Esi Fridge Rescue receptų gelbėtojas. Pagal vartotojo situaciją paruošk pilną, aiškų ir praktišką pasirinkto recepto variantą lietuviškai. Būtinai pritaikyk ingredientų kiekius žmonių skaičiui, pasiūlyk trūkstamų produktų pakaitalus, atsižvelk į nurodytą laiką ir pageidaujamą aštrumą. Naudok originalias instrukcijas kaip pagrindą, bet pakeisk jas pagal situaciją. Neapsiribok bendru patarimu — pateik ingredientus ir žingsnis po žingsnio gaminimo eigą. Atsakymą struktūruok antraštėmis: „Pritaikytas receptas“, „Ingredientai“, „Gaminimo eiga“, „Laikas ir porcijos“, „Kas pakeista“. Jei trūksta duomenų kiekiams apskaičiuoti, aiškiai tai pasakyk. Jei prašymas susijęs su alergija, primink patikrinti etiketes ir kryžminę taršą; neteik medicininių garantijų." },
+          { role: "user", content: JSON.stringify({ original_recipe: { id: meal.idMeal, name: meal.strMeal, category: meal.strCategory, cuisine: meal.strArea, ingredients, original_instructions: meal.strInstructions.slice(0, 5000) }, user_situation: instruction }) },
         ],
       }),
       signal: AbortSignal.timeout(30_000),

@@ -39,12 +39,17 @@ export function AdaptRecipe({ meal }: { meal: Meal }) {
 
   return <section className="adapt-card">
     <div className="adapt-heading"><span className="adapt-icon">✳</span><div><p className="eyebrow">TAVO VIRTUVĖS ASISTENTAS</p><h2>Pritaikyk šį receptą</h2></div></div>
-    <p>Trūksta ingrediento? Nori vegetariško varianto? Parašyk, ko reikia, ir AI pasiūlys pakeitimus.</p>
+    <p>AI automatiškai gaus pasirinkto recepto ingredientus ir gaminimo instrukciją. Aprašyk savo situaciją, kad galėtų paruošti tau pritaikytą variantą.</p>
+    <p className="adapt-recipe-context">Pritaikomas receptas: <strong>{meal.strMeal}</strong></p>
     {!isSupabaseConfigured() && <div className="notice">AI pritaikymui reikia Supabase prisijungimo ir OpenRouter rakto. Sąrankos instrukcijos — README faile.</div>}
     <form className="adapt-form" onSubmit={submit}>
-      <label className="sr-only" htmlFor="adaptation-request">Kaip pritaikyti receptą?</label>
-      <textarea id="adaptation-request" value={instruction} onChange={(event) => setInstruction(event.target.value)} maxLength={500} required placeholder="Pvz., pritaikyk receptą be pieno produktų..." />
-      <div className="adapt-form-footer"><span>{instruction.length}/500</span><button className="button-primary" disabled={busy || !instruction.trim()}>{busy ? "Galvojama…" : "Pritaikyti receptą"}<span> ✦</span></button></div>
+      <label htmlFor="adaptation-request">Tavo situacija</label>
+      <div className="adapt-suggestions" aria-label="Pavyzdiniai prašymai">
+        <button type="button" onClick={() => setInstruction("Neturiu pieno ir sviesto, turiu tik 30 minučių.")}>Be pieno · iki 30 min.</button>
+        <button type="button" onClick={() => setInstruction("Gaminsiu keturiems žmonėms ir nenoriu labai aštraus maisto.")}>4 žmonėms · švelniau</button>
+      </div>
+      <textarea id="adaptation-request" value={instruction} onChange={(event) => setInstruction(event.target.value)} maxLength={500} required placeholder="Pvz., Neturiu pieno ir sviesto, turiu tik 30 minučių." />
+      <div className="adapt-form-footer"><span>{instruction.length}/500</span><button className="button-primary" disabled={busy || !instruction.trim()}>{busy ? "Pritaikomas receptas…" : "✨ Pritaikyti receptą"}</button></div>
     </form>
     {error && <div className="notice error-notice" role="alert">{error} {error.startsWith("Prisijunk") && <Link href="/account">Prisijungti →</Link>}</div>}
     {answer && <div className="ai-answer"><p className="eyebrow">AI PASIŪLYMAS</p><div>{answer}</div><p className="ai-disclaimer">AI pasiūlymą peržiūrėk prieš gamindamas, ypač jei keiti alergiją sukeliančius produktus.</p></div>}
