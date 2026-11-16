@@ -28,6 +28,19 @@
 .adapt-options button{border:1px solid #cad6c1;border-radius:99px;background:white;color:var(--green);padding:8px 13px;font-size:12px}
 .adapt-options button[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:white}
 .adapt-options button:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+.ai-help-form>.adapt-options{grid-column:1/-1}
+.save-ai-recipe{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+.save-ai-recipe p{font-size:12px}
+.save-ai-recipe a{color:var(--green);text-decoration:underline}
+.my-ai-recipes{margin-top:28px;padding:30px;background:white;border:1px solid var(--line);border-radius:10px;scroll-margin-top:24px}
+.my-ai-recipes h2{font:500 32px var(--serif);margin:0 0 20px}
+.saved-ai-recipe{border-top:1px solid var(--line);padding:16px 0;overflow-wrap:anywhere}
+.saved-ai-recipe summary{cursor:pointer;font-weight:700;line-height:1.6}
+.saved-ai-recipe time{display:block;font-size:11px;font-weight:400;color:var(--muted)}
+.saved-ai-recipe h3{font-size:14px;margin-top:22px}
+.saved-ai-recipe p,.saved-ai-recipe li{font-size:13px;line-height:1.7;white-space:pre-wrap}
+.saved-ai-result{white-space:pre-wrap;font-size:13px;line-height:1.8}
+@media(max-width:680px){.my-ai-recipes{padding:20px 15px}}
 
 .saved-recipe-card{display:flex;flex-direction:column}.saved-recipe-card .recipe-card-info{padding-bottom:12px}.saved-card-title{display:block;font:500 20px/1.25 var(--serif);margin:8px 0 10px}.saved-category-badge{display:inline-flex;border-radius:99px;background:#edf2e6;color:#4e6947;padding:5px 9px;font-size:10px;font-weight:600}.saved-recipe-editor{display:grid;gap:10px;border-top:1px solid var(--line);margin:0 14px 15px;padding-top:13px}.saved-recipe-editor label{display:grid;gap:5px;color:#59645a;font-size:10px;font-weight:700}.saved-recipe-editor select,.saved-recipe-editor textarea{width:100%;border:1px solid #dfe3da;border-radius:5px;background:#fff;color:var(--ink);padding:9px;font-size:11px;outline-color:#829a72}.saved-recipe-editor textarea{min-height:67px;resize:vertical;line-height:1.5}.saved-editor-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}.saved-editor-message{font-size:10px;color:var(--green)}.saved-recipe-editor button{padding:8px 11px;font-size:10px}
 

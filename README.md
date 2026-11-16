@@ -37,6 +37,12 @@ Email and password sign-up/sign-in are provided by Supabase Auth. If email confi
 - Next.js Route Handlers `/api/meals/search` and `/api/meals/[id]` call TheMealDB, validate inputs, and cache responses briefly.
 - The `/api/ai` and `/api/recipes/adapt` Route Handlers verify the user's Supabase session and call OpenRouter using the private API key. AI help follows the flow browser → `/api/ai` → OpenRouter → `/api/ai` → browser; the OpenRouter key is read only by the server.
 
+## My AI recipes
+
+Run `supabase/migrations/20261116020000_create_ai_recipes.sql` in your Supabase project's **SQL Editor** before using AI recipe saving. It creates `ai_recipes` with owner-only SELECT/INSERT policies; anonymous access is disabled. No service-role key is needed.
+
+After generating an answer, signed-in users can click **Išsaugok pritaikytą receptą** and find it in **Paskyra → Mano AI receptai**. The saved entry contains the original recipe name and ID (for recipe adaptations), the submitted request and parameters, the full AI result, user ID, and database creation timestamp. General AI help has no original recipe, so it is labeled **AI recepto idėja (be originalaus recepto)**. The saved request is a snapshot of the generation request; later edits to the form do not change it. Switching accounts hides the previous user's collection.
+
 ## Environment variables
 
 | Variable | Used in | Required |

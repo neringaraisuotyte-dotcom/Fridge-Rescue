@@ -48,6 +48,7 @@ export function AuthPanel() {
     {userEmail ? <>
       <p className="eyebrow">TAVO PASKYRA</p><h2>Sveiki sugrįžę!</h2><p className="auth-copy">Prisijungta kaip <strong>{userEmail}</strong></p>
       <Link href="#my-saved-recipes" className="button-primary full-button">Mano išsaugoti receptai <span>↓</span></Link>
+      <Link href="#my-ai-recipes" className="button-secondary full-button">Mano AI receptai <span>↓</span></Link>
       <button className="button-secondary full-button" onClick={signOut}>Atsijungti</button>
     </> : <>
       <p className="eyebrow">TAVO RECEPTŲ KOLEKCIJA</p><h2>{mode === "login" ? "Prisijunk" : "Sukurk paskyrą"}</h2>

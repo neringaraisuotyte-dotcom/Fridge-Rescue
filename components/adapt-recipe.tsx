@@ -4,6 +4,8 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import type { Meal } from "@/lib/meals";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { SaveAiRecipe } from "@/components/save-ai-recipe";
+import type { AiRecipeDraft } from "@/lib/ai-recipes";
 
 export function AdaptRecipe({ meal }: { meal: Meal }) {
   const [instruction, setInstruction] = useState("");
@@ -11,12 +13,14 @@ export function AdaptRecipe({ meal }: { meal: Meal }) {
   const [people, setPeople] = useState<number | null>(null);
   const [goal, setGoal] = useState("");
   const [answer, setAnswer] = useState("");
+  const [draft, setDraft] = useState<AiRecipeDraft | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true); setError(""); setAnswer("");
+    setDraft(null);
     const supabase = getSupabaseBrowserClient();
     const { data } = await supabase?.auth.getSession() ?? { data: { session: null } };
     if (!data.session) {
@@ -33,6 +37,7 @@ export function AdaptRecipe({ meal }: { meal: Meal }) {
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "AI pritaikymas nepavyko.");
       setAnswer(payload.answer);
+      setDraft({ user_id: data.session.user.id, original_recipe_name: meal.strMeal, original_recipe_id: meal.idMeal, user_request: instruction, parameters: { minutes, people, goal }, ai_result: payload.answer });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "AI pritaikymas nepavyko.");
     } finally {
@@ -61,6 +66,6 @@ export function AdaptRecipe({ meal }: { meal: Meal }) {
       <div className="adapt-form-footer"><span>{instruction.length}/500</span><button className="button-primary" disabled={busy || !(instruction.trim() || minutes || people || goal)}>{busy ? "Pritaikomas receptas…" : "✨ Pritaikyti receptą"}</button></div>
     </form>
     {error && <div className="notice error-notice" role="alert">{error} {error.startsWith("Prisijunk") && <Link href="/account">Prisijungti →</Link>}</div>}
-    {answer && <div className="ai-answer"><p className="eyebrow">AI PASIŪLYMAS</p><div>{answer}</div><p className="ai-disclaimer">AI pasiūlymą peržiūrėk prieš gamindamas, ypač jei keiti alergiją sukeliančius produktus.</p></div>}
+    {answer && <div className="ai-answer"><p className="eyebrow">AI PASIŪLYMAS</p><div>{answer}</div><p className="ai-disclaimer">AI pasiūlymą peržiūrėk prieš gamindamas, ypač jei keiti alergiją sukeliančius produktus.</p>{draft && <SaveAiRecipe draft={draft} />}</div>}
   </section>;
 }

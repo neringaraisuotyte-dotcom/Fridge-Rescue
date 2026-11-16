@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { SaveAiRecipe } from "@/components/save-ai-recipe";
+import type { AiRecipeDraft } from "@/lib/ai-recipes";
 
 export function AiHelp() {
   const [signedIn, setSignedIn] = useState(false);
@@ -17,6 +19,7 @@ export function AiHelp() {
     goal ? `Norimas rezultatas: ${goal}.` : "",
   ].filter(Boolean).join(" ");
   const [answer, setAnswer] = useState("");
+  const [draft, setDraft] = useState<AiRecipeDraft | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -34,6 +37,7 @@ export function AiHelp() {
     setBusy(true);
     setError("");
     setAnswer("");
+    setDraft(null);
     const supabase = getSupabaseBrowserClient();
     const { data } = await supabase?.auth.getSession() ?? { data: { session: null } };
     if (!data.session) {
@@ -50,6 +54,7 @@ export function AiHelp() {
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "AI pagalbos užklausa nepavyko.");
       setAnswer(payload.answer);
+      setDraft({ user_id: data.session.user.id, original_recipe_name: "AI recepto idėja (be originalaus recepto)", original_recipe_id: null, user_request: question, parameters: { minutes, people, goal, ingredients }, ai_result: payload.answer });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "AI pagalbos užklausa nepavyko.");
     } finally {
@@ -72,6 +77,6 @@ export function AiHelp() {
     </form>
     {!signedIn && isSupabaseConfigured() && <p className="ai-help-auth">Norint siųsti klausimą, reikia <Link href="/account">prisijungti prie paskyros</Link>.</p>}
     {error && <div className="notice error-notice" role="alert">{error} {error.includes("Prisijunk") && <Link href="/account">Prisijungti →</Link>}</div>}
-    {answer && <div className="ai-answer"><p className="eyebrow">AI ATSAKYMAS</p><div>{answer}</div><p className="ai-disclaimer">AI pasiūlymą įvertink prieš gamindamas, ypač jei jis susijęs su alergijomis.</p></div>}
+    {answer && <div className="ai-answer"><p className="eyebrow">AI ATSAKYMAS</p><div>{answer}</div><p className="ai-disclaimer">AI pasiūlymą įvertink prieš gamindamas, ypač jei jis susijęs su alergijomis.</p>{draft && <SaveAiRecipe draft={draft} />}</div>}
   </section>;
 }
