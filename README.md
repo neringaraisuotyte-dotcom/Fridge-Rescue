@@ -11,6 +11,8 @@ A Lithuanian recipe discovery app built with Next.js. Search TheMealDB, open a c
 
 Ingredient search and recipe details use TheMealDB's public API and work without credentials. Ingredient search follows TheMealDB's `filter.php?i=` endpoint; use a single ingredient such as `chicken` or `salmon`.
 
+Select **Pagal patiekalo pavadinimą** to search existing meal names (for example, `Arrabiata` or `Teriyaki`). This uses `search.php?s=` through `/api/meals/search?q=Arrabiata&mode=name`. Use English ingredient and meal names. The default `mode=ingredient` preserves ingredient search; numeric IDs work in either mode.
+
 You can also search by a numeric TheMealDB recipe ID, such as `52772`. Copy an ID using **Kopijuoti ID** on a result card or recipe page. Open a result to load full details through `lookup.php?i=`: name, photo, category, country or region, ingredients with quantities, and cooking instructions. Clipboard copying requires localhost or HTTPS; the ID can also be selected and copied manually.
 
 ## Configure Supabase

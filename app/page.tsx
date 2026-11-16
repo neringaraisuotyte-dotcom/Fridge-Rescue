@@ -8,6 +8,8 @@ import { RecipeId } from "@/components/recipe-id";
 
 export default function HomePage() {
   const [query, setQuery] = useState("");
+  const [mode, setMode] = useState<"ingredient" | "name">("ingredient");
+  const [submittedQuery, setSubmittedQuery] = useState("");
   const [meals, setMeals] = useState<MealSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -18,9 +20,10 @@ export default function HomePage() {
     if (!query.trim()) return;
     setLoading(true);
     setSearched(true);
+    setSubmittedQuery(query.trim());
     setError("");
     try {
-      const response = await fetch(`/api/meals/search?q=${encodeURIComponent(query.trim())}`);
+      const response = await fetch(`/api/meals/search?q=${encodeURIComponent(query.trim())}&mode=${mode}`);
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "Paieška nepavyko.");
       setMeals(payload.meals ?? []);
@@ -38,20 +41,25 @@ export default function HomePage() {
         <div className="hero-content">
           <p className="eyebrow"><span className="eyebrow-dot" /> TAVO ŠALDYTUVO IDĖJŲ GELBĖTOJAS</p>
           <h1>Kas šiandien<br /><em>ant stalo?</em></h1>
-          <p className="hero-copy">Įrašyk ingredientą arba recepto ID ir atrask, ką skanaus gali pagaminti.</p>
+          <p className="hero-copy">Ieškok pagal ingredientą, patiekalo pavadinimą arba recepto ID. Pavadinimus ir ingredientus rašyk angliškai.</p>
+          <fieldset className="search-modes" disabled={loading}>
+            <legend className="sr-only">Paieškos būdas</legend>
+            <label><input type="radio" name="search-mode" value="ingredient" checked={mode === "ingredient"} onChange={() => setMode("ingredient")} /> Pagal ingredientą</label>
+            <label><input type="radio" name="search-mode" value="name" checked={mode === "name"} onChange={() => setMode("name")} /> Pagal patiekalo pavadinimą</label>
+          </fieldset>
           <form className="search-form" onSubmit={search}>
             <span className="search-icon" aria-hidden="true">⌕</span>
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Pvz., chicken, salmon arba 52772" aria-label="Įvesk ingredientą arba recepto ID" maxLength={80} />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={mode === "name" ? "Pvz., Arrabiata, Teriyaki arba 52772" : "Pvz., chicken, salmon arba 52772"} aria-label={mode === "name" ? "Įvesk patiekalo pavadinimą arba recepto ID" : "Įvesk ingredientą arba recepto ID"} maxLength={80} />
             <button type="submit" disabled={loading || !query.trim()}>{loading ? "Ieškoma…" : "Ieškoti"}<span aria-hidden="true"> →</span></button>
           </form>
-          <div className="suggestions"><span>Populiaru:</span>{["Chicken", "Pasta", "Salmon"].map((item) => <button key={item} onClick={() => setQuery(item)}>{item}</button>)}</div>
+          <div className="suggestions"><span>Pabandyk:</span>{(mode === "name" ? ["Arrabiata", "Teriyaki", "Lasagne"] : ["Chicken", "Pasta", "Salmon"]).map((item) => <button key={item} onClick={() => setQuery(item)}>{item}</button>)}</div>
         </div>
         <div className="hero-art" aria-hidden="true"><div className="hero-orbit orbit-one" /><div className="hero-orbit orbit-two" /><div className="plate"><div className="plate-food">🥗</div></div><span className="floating-note note-top">šviežia idėja ✦</span><span className="floating-note note-bottom">#nešvaistom</span></div>
         <span className="hero-number" aria-hidden="true">01 — 03</span>
       </section>
 
       <section className="results-section" id="recipes">
-        <div className="section-heading"><div><p className="eyebrow">ATRASK KAŽKĄ SKANAUS</p><h2>{searched ? `Paieškos rezultatai${query ? `: „${query}“` : ""}` : "Receptai laukia tavęs"}</h2></div><span className="result-count">{searched && !loading ? `${meals.length} ${meals.length === 1 ? "receptas" : "receptų"}` : "TheMealDB kolekcija"}</span></div>
+        <div className="section-heading"><div><p className="eyebrow">ATRASK KAŽKĄ SKANAUS</p><h2>{searched ? `Paieškos rezultatai: „${submittedQuery}“` : "Receptai laukia tavęs"}</h2></div><span className="result-count">{searched && !loading ? `${meals.length} ${meals.length === 1 ? "receptas" : "receptų"}` : "TheMealDB kolekcija"}</span></div>
         {error && <div className="notice error-notice" role="alert">{error}</div>}
         {loading && <div className="empty-state"><span className="loader" /> Ieškome receptų…</div>}
         {!loading && searched && meals.length === 0 && !error && <div className="empty-state"><span className="empty-icon">⌕</span><h3>Nieko neradome</h3><p>Pabandyk kitą ingredientą ar patiekalo pavadinimą.</p></div>}

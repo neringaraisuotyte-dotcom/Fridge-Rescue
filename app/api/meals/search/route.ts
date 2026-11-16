@@ -3,12 +3,16 @@ import type { MealSummary } from "@/lib/meals";
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q")?.trim();
+  const mode = request.nextUrl.searchParams.get("mode") ?? "ingredient";
+  if (mode !== "ingredient" && mode !== "name") {
+    return NextResponse.json({ error: "Neteisingas paieškos būdas." }, { status: 400 });
+  }
   if (!query || query.length > 80) {
     return NextResponse.json({ error: "Įrašyk paieškos žodį (iki 80 simbolių)." }, { status: 400 });
   }
 
   try {
-    const endpoint = /^\d+$/.test(query) ? "lookup.php?i=" : "filter.php?i=";
+    const endpoint = /^\d+$/.test(query) ? "lookup.php?i=" : mode === "name" ? "search.php?s=" : "filter.php?i=";
     const response = await fetch(`https://www.themealdb.com/api/json/v1/1/${endpoint}${encodeURIComponent(query)}`, { next: { revalidate: 300 } });
     if (!response.ok) throw new Error("TheMealDB returned an error");
     const data = await response.json() as { meals: MealSummary[] | null };
