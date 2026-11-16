@@ -44,7 +44,7 @@ function AiRecipeCollection({ userId }: { userId: string }) {
 
   return <section id="my-ai-recipes" className="my-ai-recipes">
     <p className="eyebrow">TAVO ASMENINĖ KOLEKCIJA</p><h2>Mano AI receptai</h2>
-    {loading ? <p role="status">Kraunami AI receptai…</p> : error ? <p className="notice error-notice" role="alert">{error}</p> : recipes.length === 0 ? <p>Dar neturi išsaugotų AI receptų. Po AI atsakymu spausk „Išsaugok pritaikytą receptą“.</p> : recipes.map((recipe) => <details className="saved-ai-recipe" key={recipe.id}>
+    {loading ? <p role="status">Kraunami AI receptai…</p> : error ? <p className="notice error-notice" role="alert">{error}</p> : recipes.length === 0 ? <p>Dar neturi išsaugotų AI receptų. <Link href="/#ai-help">Paklausk AI receptų gelbėtojo</Link>, o po atsakymu spausk „Išsaugoti AI receptą“.</p> : recipes.map((recipe) => <details className="saved-ai-recipe" key={recipe.id}>
       <summary>{recipe.original_recipe_name} <time dateTime={recipe.created_at}>{new Date(recipe.created_at).toLocaleString("lt-LT")}</time></summary>
       {recipe.original_recipe_id && <p><Link href={`/recipes/${encodeURIComponent(recipe.original_recipe_id)}`}>Originalus receptas →</Link></p>}
       <h3>Tavo prašymas</h3><p>{recipe.user_request || "Pasirinkti greitieji parametrai"}</p>
