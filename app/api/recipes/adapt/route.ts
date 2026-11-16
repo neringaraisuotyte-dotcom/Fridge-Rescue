@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   const { data: { user }, error: authError } = await supabase.auth.getUser(accessToken);
   if (authError || !user) return NextResponse.json({ error: "Sesija nebegalioja. Prisijunk iš naujo." }, { status: 401 });
 
-  let body: { meal?: Meal; request?: unknown };
+  let body: { meal?: Meal; request?: unknown; preferences?: { minutes?: unknown; people?: unknown; goal?: unknown } };
   try {
     body = await request.json();
   } catch {
@@ -23,7 +23,19 @@ export async function POST(request: NextRequest) {
   }
   const meal = body.meal;
   const instruction = typeof body.request === "string" ? body.request.trim() : "";
-  if (!meal || typeof meal.idMeal !== "string" || typeof meal.strMeal !== "string" || typeof meal.strInstructions !== "string" || !instruction || instruction.length > 500) {
+  const preferences = body.preferences ?? {};
+  if (typeof preferences !== "object" || Array.isArray(preferences)
+    || (preferences.minutes != null && ![15, 30, 60].includes(preferences.minutes as number))
+    || (preferences.people != null && ![1, 2, 4, 6].includes(preferences.people as number))
+    || (preferences.goal != null && !["", "paprasčiau", "pigiau", "sveikiau", "kuo panašiau į originalą"].includes(preferences.goal as string))) {
+    return NextResponse.json({ error: "Netinkami greitieji pasirinkimai." }, { status: 400 });
+  }
+  const selectedPreferences = [
+    preferences.minutes ? `Gaminimui turiu iki ${preferences.minutes} minučių.` : "",
+    preferences.people ? `Pritaikyk receptą ${preferences.people} žmonėms.` : "",
+    preferences.goal ? `Norimas rezultatas: ${preferences.goal}.` : "",
+  ].filter(Boolean).join(" ");
+  if (!meal || typeof meal.idMeal !== "string" || typeof meal.strMeal !== "string" || typeof meal.strInstructions !== "string" || !(instruction || selectedPreferences) || instruction.length > 500) {
     return NextResponse.json({ error: "Pateik receptą ir trumpą pritaikymo prašymą (iki 500 simbolių)." }, { status: 400 });
   }
   const ingredients = getIngredients(meal);
@@ -40,7 +52,7 @@ export async function POST(request: NextRequest) {
         max_tokens: 1600,
         messages: [
           { role: "system", content: "Esi Fridge Rescue receptų gelbėtojas. Pagal vartotojo situaciją paruošk pilną, aiškų ir praktišką pasirinkto recepto variantą lietuviškai. Būtinai pritaikyk ingredientų kiekius žmonių skaičiui, pasiūlyk trūkstamų produktų pakaitalus, atsižvelk į nurodytą laiką ir pageidaujamą aštrumą. Naudok originalias instrukcijas kaip pagrindą, bet pakeisk jas pagal situaciją. Neapsiribok bendru patarimu — pateik ingredientus ir žingsnis po žingsnio gaminimo eigą. Atsakymą struktūruok antraštėmis: „Pritaikytas receptas“, „Ingredientai“, „Gaminimo eiga“, „Laikas ir porcijos“, „Kas pakeista“. Jei trūksta duomenų kiekiams apskaičiuoti, aiškiai tai pasakyk. Jei prašymas susijęs su alergija, primink patikrinti etiketes ir kryžminę taršą; neteik medicininių garantijų." },
-          { role: "user", content: JSON.stringify({ original_recipe: { id: meal.idMeal, name: meal.strMeal, category: meal.strCategory, cuisine: meal.strArea, ingredients, original_instructions: meal.strInstructions.slice(0, 5000) }, user_situation: instruction }) },
+          { role: "user", content: JSON.stringify({ original_recipe: { id: meal.idMeal, name: meal.strMeal, category: meal.strCategory, cuisine: meal.strArea, ingredients, original_instructions: meal.strInstructions.slice(0, 5000) }, user_situation: instruction, selected_preferences: selectedPreferences }) },
         ],
       }),
       signal: AbortSignal.timeout(30_000),
