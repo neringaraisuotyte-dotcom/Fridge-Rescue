@@ -57,7 +57,7 @@ export default function HomePage() {
           </form>
           <div className="suggestions"><span>Pabandyk:</span>{(mode === "name" ? ["Arrabiata", "Teriyaki", "Lasagne"] : ["Chicken", "Pasta", "Salmon"]).map((item) => <button key={item} onClick={() => setQuery(item)}>{item}</button>)}</div>
         </div>
-        <div className="hero-art" aria-hidden="true"><div className="hero-orbit orbit-one" /><div className="hero-orbit orbit-two" /><div className="plate"><div className="plate-food">🥗</div></div><span className="floating-note note-top">šviežia idėja ✦</span><span className="floating-note note-bottom">#nešvaistom</span></div>
+        <div className="hero-art"><div className="hero-photo-frame"><Image src="/hero-meal.png" alt="Spalvingas vištienos, ryžių ir daržovių patiekalas" fill priority sizes="(max-width: 680px) 54vw, (max-width: 1000px) 38vw, 420px" /></div><span className="floating-note note-top">šviežia idėja ✦</span><span className="floating-note note-bottom">#nešvaistom</span></div>
         <span className="hero-number" aria-hidden="true">01 — 03</span>
       </section>
 
