@@ -19,10 +19,10 @@ You can also search by a numeric TheMealDB recipe ID, such as `52772`. Copy an I
 
 1. Create a Supabase project.
 2. In **Project Settings → API**, copy the Project URL and publishable key into `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `.env.local`.
-3. In **SQL Editor**, run `supabase/migrations/20261116000000_create_saved_recipes.sql`.
+3. In **SQL Editor**, run the migrations in order: `supabase/migrations/20261116000000_create_saved_recipes.sql`, then `supabase/migrations/20261116010000_add_saved_recipe_category_and_note.sql`.
 4. In **Authentication → URL Configuration**, set the Site URL to `http://localhost:3000` while developing.
 
-Email and password sign-up/sign-in are provided by Supabase Auth. If email confirmation is enabled, confirm the signup from the email before signing in. The saved-recipe table uses Row Level Security so a user can only see, add, or remove their own saved recipes.
+Email and password sign-up/sign-in are provided by Supabase Auth. If email confirmation is enabled, confirm the signup from the email before signing in. The saved-recipe table uses Row Level Security so a user can only see, add, update, or remove their own saved recipes. The signed-in user's recipes, title and category filters, category and note editor, and remove actions are all available in **Paskyra → Mano išsaugoti receptai**.
 
 ## Configure OpenRouter AI
 

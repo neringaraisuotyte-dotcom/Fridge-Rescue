@@ -18,7 +18,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </Link>
           <nav className="header-nav" aria-label="Pagrindinė navigacija">
             <Link href="/">Receptai</Link>
-            <Link href="/saved">Išsaugoti</Link>
             <Link href="/account" className="account-link">Paskyra <span aria-hidden="true">↗</span></Link>
           </nav>
         </header>

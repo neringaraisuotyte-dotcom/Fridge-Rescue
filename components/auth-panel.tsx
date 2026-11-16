@@ -43,11 +43,11 @@ export function AuthPanel() {
     setMessage(error?.message ?? "Atsijungei.");
   }
 
-  return <section className="auth-card">
+  return <section className="auth-card" id="account-login">
     <div className="auth-icon">✳</div>
     {userEmail ? <>
       <p className="eyebrow">TAVO PASKYRA</p><h2>Sveiki sugrįžę!</h2><p className="auth-copy">Prisijungta kaip <strong>{userEmail}</strong></p>
-      <Link href="/saved" className="button-primary full-button">Mano išsaugoti receptai <span>→</span></Link>
+      <Link href="#my-saved-recipes" className="button-primary full-button">Mano išsaugoti receptai <span>↓</span></Link>
       <button className="button-secondary full-button" onClick={signOut}>Atsijungti</button>
     </> : <>
       <p className="eyebrow">TAVO RECEPTŲ KOLEKCIJA</p><h2>{mode === "login" ? "Prisijunk" : "Sukurk paskyrą"}</h2>

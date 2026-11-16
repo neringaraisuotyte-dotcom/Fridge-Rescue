@@ -26,7 +26,16 @@ export function FavoriteButton({ meal }: { meal: Meal }) {
       } else setSaved(false);
     };
     void refresh();
-    return () => { active = false; };
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        setUserId(null);
+        setSaved(false);
+      } else {
+        setUserId(session.user.id);
+        window.setTimeout(() => { if (active) void refresh(); }, 0);
+      }
+    });
+    return () => { active = false; subscription.unsubscribe(); };
   }, [meal.idMeal]);
 
   async function toggle() {
