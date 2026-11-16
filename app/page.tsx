@@ -10,6 +10,7 @@ export default function HomePage() {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<"ingredient" | "name">("ingredient");
   const [submittedQuery, setSubmittedQuery] = useState("");
+  const [submittedMode, setSubmittedMode] = useState<"ingredient" | "name">("ingredient");
   const [meals, setMeals] = useState<MealSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -21,6 +22,7 @@ export default function HomePage() {
     setLoading(true);
     setSearched(true);
     setSubmittedQuery(query.trim());
+    setSubmittedMode(mode);
     setError("");
     try {
       const response = await fetch(`/api/meals/search?q=${encodeURIComponent(query.trim())}&mode=${mode}`);
@@ -49,7 +51,7 @@ export default function HomePage() {
           </fieldset>
           <form className="search-form" onSubmit={search}>
             <span className="search-icon" aria-hidden="true">⌕</span>
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={mode === "name" ? "Pvz., Arrabiata, Teriyaki arba 52772" : "Pvz., chicken, salmon arba 52772"} aria-label={mode === "name" ? "Įvesk patiekalo pavadinimą arba recepto ID" : "Įvesk ingredientą arba recepto ID"} maxLength={80} />
+            <input id="meal-search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={mode === "name" ? "Pvz., Arrabiata, Teriyaki arba 52772" : "Pvz., chicken, salmon arba 52772"} aria-label={mode === "name" ? "Įvesk patiekalo pavadinimą arba recepto ID" : "Įvesk ingredientą arba recepto ID"} maxLength={80} />
             <button type="submit" disabled={loading || !query.trim()}>{loading ? "Ieškoma…" : "Ieškoti"}<span aria-hidden="true"> →</span></button>
           </form>
           <div className="suggestions"><span>Pabandyk:</span>{(mode === "name" ? ["Arrabiata", "Teriyaki", "Lasagne"] : ["Chicken", "Pasta", "Salmon"]).map((item) => <button key={item} onClick={() => setQuery(item)}>{item}</button>)}</div>
@@ -62,7 +64,7 @@ export default function HomePage() {
         <div className="section-heading"><div><p className="eyebrow">ATRASK KAŽKĄ SKANAUS</p><h2>{searched ? `Paieškos rezultatai: „${submittedQuery}“` : "Receptai laukia tavęs"}</h2></div><span className="result-count">{searched && !loading ? `${meals.length} ${meals.length === 1 ? "receptas" : "receptų"}` : "TheMealDB kolekcija"}</span></div>
         {error && <div className="notice error-notice" role="alert">{error}</div>}
         {loading && <div className="empty-state"><span className="loader" /> Ieškome receptų…</div>}
-        {!loading && searched && meals.length === 0 && !error && <div className="empty-state"><span className="empty-icon">⌕</span><h3>Nieko neradome</h3><p>Pabandyk kitą ingredientą ar patiekalo pavadinimą.</p></div>}
+        {!loading && searched && meals.length === 0 && !error && <div className="empty-state"><span className="empty-icon">⌕</span><h3>Nieko neradome</h3>{submittedMode === "ingredient" ? <><p>Ieškota pagal ingredientą. Jei įrašei patiekalo pavadinimą, pasirink paiešką pagal pavadinimą.</p><button type="button" className="button-secondary" onClick={() => { setMode("name"); setQuery(submittedQuery); document.getElementById("meal-search")?.focus(); }}>Pasirinkti paiešką pagal pavadinimą</button></> : <p>Pabandyk trumpesnį anglišką pavadinimą, pvz., „Katsu“ arba „Curry“.</p>}</div>}
         {!loading && meals.length > 0 && <div className="recipe-grid">{meals.map((meal, index) => <article className="recipe-card" key={meal.idMeal}><Link href={`/recipes/${encodeURIComponent(meal.idMeal)}`}>
           <div className="recipe-image"><Image src={meal.strMealThumb} alt={meal.strMeal} fill sizes="(max-width: 700px) 100vw, (max-width: 1000px) 50vw, 33vw" priority={index < 3} /><span className="card-arrow" aria-hidden="true">↗</span></div>
           <div className="recipe-card-info"><span className="card-kicker">THEMEALDB · RECEPTAS</span><h3>{meal.strMeal}</h3><span className="view-recipe">Peržiūrėti receptą <span aria-hidden="true">→</span></span></div>
