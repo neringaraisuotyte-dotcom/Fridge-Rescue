@@ -76,6 +76,7 @@ export function AiHelp() {
       <label>Kuo galiu padėti?<textarea value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={500} required={!preferences} placeholder="Pvz., ką galėčiau pagaminti per 20 minučių?" /></label>
       <div className="ai-help-footer"><span>{question.length}/500</span><button className="button-primary" disabled={busy || !(question.trim() || preferences)}>{busy ? "Ruošiu atsakymą…" : "Paklausti OpenRouter AI"}<span aria-hidden="true"> ✦</span></button></div>
     </form>
+    {signedIn && !answer && <p className="ai-help-auth">Gavęs AI atsakymą, galėsi spausti „Išsaugoti AI receptą“. Jį rasi skiltyje <Link href="/account#my-ai-recipes">Mano AI receptai</Link>.</p>}
     {!signedIn && isSupabaseConfigured() && <p className="ai-help-auth">Norint siųsti klausimą, reikia <Link href="/account">prisijungti prie paskyros</Link>.</p>}
     {error && <div className="notice error-notice" role="alert">{error} {error.includes("Prisijunk") && <Link href="/account">Prisijungti →</Link>}</div>}
     {answer && <div className="ai-answer"><p className="eyebrow">AI ATSAKYMAS</p><div>{answer}</div><p className="ai-disclaimer">AI pasiūlymą įvertink prieš gamindamas, ypač jei jis susijęs su alergijomis.</p>{draft && <SaveAiRecipe draft={draft} />}</div>}
