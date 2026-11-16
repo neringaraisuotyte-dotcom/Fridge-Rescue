@@ -1,6 +1,6 @@
 ﻿# Fridge Rescue
 
-A Lithuanian recipe discovery app built with Next.js. Search TheMealDB, open a complete recipe, save favorites with Supabase, and ask OpenRouter AI to adapt a recipe to your needs.
+A Lithuanian recipe discovery app built with Next.js. Search TheMealDB, open a complete recipe, save favorites with Supabase, and get cooking help or recipe adaptations from OpenRouter AI.
 
 ## Run locally
 
@@ -29,13 +29,13 @@ Email and password sign-up/sign-in are provided by Supabase Auth. If email confi
 1. Create an API key in your OpenRouter account.
 2. Set `OPENROUTER_API_KEY` in `.env.local`. This is a server-only secret; never prefix it with `NEXT_PUBLIC_` or commit it.
 3. Optionally set `OPENROUTER_MODEL` to a model available in your OpenRouter account. If omitted, the server uses `openrouter/auto`.
-4. AI adaptation requires a signed-in Supabase user. The server verifies the user's access token before sending the recipe and request to OpenRouter.
+4. Homepage AI help and recipe adaptation require a signed-in Supabase user. The server verifies the user's access token before sending the question, ingredients, or recipe to OpenRouter.
 
 ## Where requests run
 
 - The browser renders the app and uses Supabase Auth and its publishable key for sign-in and row-level-protected saved recipes.
 - Next.js Route Handlers `/api/meals/search` and `/api/meals/[id]` call TheMealDB, validate inputs, and cache responses briefly.
-- The `/api/recipes/adapt` Route Handler verifies the user's Supabase session and calls OpenRouter using the private API key.
+- The `/api/ai` and `/api/recipes/adapt` Route Handlers verify the user's Supabase session and call OpenRouter using the private API key. AI help follows the flow browser → `/api/ai` → OpenRouter → `/api/ai` → browser; the OpenRouter key is read only by the server.
 
 ## Environment variables
 
@@ -43,7 +43,7 @@ Email and password sign-up/sign-in are provided by Supabase Auth. If email confi
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Browser and server | For accounts and saved recipes / AI access |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Browser and server | For accounts and saved recipes / AI access |
-| `OPENROUTER_API_KEY` | Server only | For AI adaptation |
+| `OPENROUTER_API_KEY` | Server only | For AI help and recipe adaptation |
 | `OPENROUTER_MODEL` | Server only | Optional model selection |
 | `NEXT_PUBLIC_APP_URL` | Server request metadata | Optional; defaults to `http://localhost:3000` |
 
