@@ -44,7 +44,7 @@ function RecipeDetails({ id }: { id: string }) {
         {meal.strTags && <div className="tag-list">{meal.strTags.split(",").map((tag) => <span key={tag}>{tag.trim()}</span>)}</div>}
       </div>
     </section>
-    <div className="recipe-columns"><section className="ingredients-panel"><p className="eyebrow">KO REIKĖS</p><h2>Ingredientai <span>({ingredients.length})</span></h2><ul>{ingredients.map(({ ingredient, measure }) => <li key={ingredient}><span className="ingredient-check">✓</span><span>{ingredient}</span><span className="measure">{measure}</span></li>)}</ul></section>
+    <div className="recipe-columns"><section className="ingredients-panel"><p className="eyebrow">KO REIKĖS</p><h2>Ingredientai <span>({ingredients.length})</span></h2><ul>{ingredients.map(({ ingredient, measure }, index) => <li key={`${index}-${ingredient}`}><span className="ingredient-check">✓</span><span>{ingredient}</span><span className="measure">{measure}</span></li>)}</ul></section>
       <section className="instructions-panel"><p className="eyebrow">ŽINGSNIS PO ŽINGSNIO</p><h2>Gaminimo eiga</h2>{meal.strInstructions?.split(/\r?\n|(?<=\.)\s+(?=[A-Z])/).filter((step) => step.trim()).map((step, index) => <article className="instruction-step" key={`${index}-${step.slice(0, 18)}`}><span>{String(index + 1).padStart(2, "0")}</span><p>{step.trim()}</p></article>)}</section>
     </div>
     <AdaptRecipe meal={meal} />
