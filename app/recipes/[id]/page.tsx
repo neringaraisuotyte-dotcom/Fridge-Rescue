@@ -6,25 +6,31 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdaptRecipe } from "@/components/adapt-recipe";
 import { FavoriteButton } from "@/components/favorite-button";
+import { RecipeId } from "@/components/recipe-id";
 import { getIngredients, type Meal } from "@/lib/meals";
 
 export default function RecipePage() {
   const params = useParams<{ id: string }>();
+  return <RecipeDetails key={params.id} id={params.id} />;
+}
+
+function RecipeDetails({ id }: { id: string }) {
   const [meal, setMeal] = useState<Meal | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
-    fetch(`/api/meals/${encodeURIComponent(params.id)}`).then(async (response) => {
+    const controller = new AbortController();
+    fetch(`/api/meals/${encodeURIComponent(id)}`, { signal: controller.signal }).then(async (response) => {
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "Nepavyko gauti recepto.");
       if (active) setMeal(payload.meal);
     }).catch((cause: unknown) => {
       if (active) setError(cause instanceof Error ? cause.message : "Nepavyko gauti recepto.");
     }).finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
-  }, [params.id]);
+    return () => { active = false; controller.abort(); };
+  }, [id]);
 
   if (loading) return <div className="page-wrap empty-state"><span className="loader" /> Kraunamas receptas…</div>;
   if (error || !meal) return <div className="page-wrap"><Link href="/" className="back-link">← Grįžti į paiešką</Link><div className="notice error-notice">{error || "Receptas nerastas."}</div></div>;
@@ -34,7 +40,7 @@ export default function RecipePage() {
     <Link href="/" className="back-link">← Visi receptai</Link>
     <section className="recipe-hero">
       <div className="recipe-detail-image"><Image src={meal.strMealThumb} alt={meal.strMeal} fill priority sizes="(max-width: 760px) 100vw, 50vw" /></div>
-      <div className="recipe-detail-intro"><p className="eyebrow">{[meal.strArea, meal.strCategory].filter(Boolean).join(" · ") || "THEMEALDB RECEPTAS"}</p><h1>{meal.strMeal}</h1><p className="recipe-description">Peržiūrėk ingredientus ir gaminimo eigą, o receptą pritaikyk pagal tai, ką turi namuose.</p><FavoriteButton meal={meal} />
+      <div className="recipe-detail-intro"><p className="eyebrow">THEMEALDB RECEPTAS</p><h1>{meal.strMeal}</h1><RecipeId id={meal.idMeal} /><dl className="recipe-metadata"><div><dt>Kategorija</dt><dd>{meal.strCategory || "Nenurodyta"}</dd></div><div><dt>Kilmės šalis arba regionas</dt><dd>{meal.strArea || "Nenurodyta"}</dd></div></dl><p className="recipe-description">Peržiūrėk ingredientus ir gaminimo eigą, o receptą pritaikyk pagal tai, ką turi namuose.</p><FavoriteButton meal={meal} />
         {meal.strTags && <div className="tag-list">{meal.strTags.split(",").map((tag) => <span key={tag}>{tag.trim()}</span>)}</div>}
       </div>
     </section>

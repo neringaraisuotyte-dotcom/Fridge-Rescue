@@ -8,10 +8,11 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?i=${encodeURIComponent(query)}`, { next: { revalidate: 300 } });
+    const endpoint = /^\d+$/.test(query) ? "lookup.php?i=" : "filter.php?i=";
+    const response = await fetch(`https://www.themealdb.com/api/json/v1/1/${endpoint}${encodeURIComponent(query)}`, { next: { revalidate: 300 } });
     if (!response.ok) throw new Error("TheMealDB returned an error");
     const data = await response.json() as { meals: MealSummary[] | null };
-    return NextResponse.json({ meals: data.meals ?? [] });
+    return NextResponse.json({ meals: (data.meals ?? []).map(({ idMeal, strMeal, strMealThumb }) => ({ idMeal, strMeal, strMealThumb })) });
   } catch {
     return NextResponse.json({ error: "Receptų paslauga laikinai nepasiekiama. Pabandyk dar kartą." }, { status: 502 });
   }
