@@ -112,7 +112,7 @@ function HomePage() {
                                         value: query,
                                         onChange: (event)=>setQuery(event.target.value),
                                         placeholder: "Pvz., chicken, salmon, pasta...",
-                                        "aria-label": "Ieškoti receptų pagal pavadinimą"
+                                        "aria-label": "Įvesk ingredientą receptų paieškai"
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
                                         lineNumber: 43,
@@ -122,14 +122,14 @@ function HomePage() {
                                         type: "submit",
                                         disabled: loading || !query.trim(),
                                         children: [
-                                            loading ? "Ieškoma…" : "Ieškoti receptų",
+                                            loading ? "Ieškoma…" : "Ieškoti",
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 "aria-hidden": "true",
                                                 children: " →"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
                                                 lineNumber: 44,
-                                                columnNumber: 113
+                                                columnNumber: 105
                                             }, this)
                                         ]
                                     }, void 0, true, {
@@ -402,6 +402,17 @@ function HomePage() {
                                                 columnNumber: 102
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                className: "card-id",
+                                                children: [
+                                                    "Recepto ID: ",
+                                                    meal.idMeal
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/app/page.tsx",
+                                                lineNumber: 59,
+                                                columnNumber: 125
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 className: "view-recipe",
                                                 children: [
                                                     "Peržiūrėti receptą ",
@@ -411,13 +422,13 @@ function HomePage() {
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/page.tsx",
                                                         lineNumber: 59,
-                                                        columnNumber: 174
+                                                        columnNumber: 232
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/page.tsx",
                                                 lineNumber: 59,
-                                                columnNumber: 125
+                                                columnNumber: 183
                                             }, this)
                                         ]
                                     }, void 0, true, {
