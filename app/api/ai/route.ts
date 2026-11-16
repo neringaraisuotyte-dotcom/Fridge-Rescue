@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   const { data: { user }, error: authError } = await supabase.auth.getUser(accessToken);
   if (authError || !user) return NextResponse.json({ error: "Sesija nebegalioja. Prisijunk iš naujo." }, { status: 401 });
 
-  let body: { ingredients?: unknown; request?: unknown };
+  let body: { ingredients?: unknown; request?: unknown; preferences?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -22,7 +22,8 @@ export async function POST(request: NextRequest) {
   }
   const ingredients = typeof body.ingredients === "string" ? body.ingredients.trim() : "";
   const question = typeof body.request === "string" ? body.request.trim() : "";
-  if (!question || question.length > 500 || ingredients.length > 300) {
+  const preferences = typeof body.preferences === "string" ? body.preferences.trim() : "";
+  if (!(question || preferences) || question.length > 500 || ingredients.length > 300 || preferences.length > 200) {
     return NextResponse.json({ error: "Įrašyk klausimą (iki 500 simbolių); ingredientų sąrašas gali būti iki 300 simbolių." }, { status: 400 });
   }
 
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
         max_tokens: 900,
         messages: [
           { role: "system", content: "Esi Fridge Rescue virtuvės asistentas. Atsakyk lietuviškai, draugiškai ir praktiškai. Padėk vartotojui su receptų idėjomis, ingredientų pakeitimais, gaminimo patarimais ar kitais virtuvės klausimais. Jei pateikti ingredientai, pirmiausia remkis jais ir pasiūlyk paprastus veiksmus. Jei klausimas susijęs su alergija, primink patikrinti etiketes ir kryžminę taršą; neteik medicininių garantijų. Atsakymą pateik aiškiai, trumpomis pastraipomis arba sąrašu." },
-          { role: "user", content: JSON.stringify({ available_ingredients: ingredients || "nenurodyta", question }) },
+          { role: "user", content: JSON.stringify({ available_ingredients: ingredients || "nenurodyta", question, selected_preferences: preferences }) },
         ],
       }),
       signal: AbortSignal.timeout(30_000),
