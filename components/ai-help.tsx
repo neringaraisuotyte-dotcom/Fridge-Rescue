@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { SaveAiRecipe } from "@/components/save-ai-recipe";
 import type { AiRecipeDraft } from "@/lib/ai-recipes";
+import { trackedFetch } from "@/lib/api-telemetry";
 
 export function AiHelp() {
   const [signedIn, setSignedIn] = useState(false);
@@ -46,7 +47,7 @@ export function AiHelp() {
       return;
     }
     try {
-      const response = await fetch("/api/ai", {
+      const response = await trackedFetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session.access_token}` },
         body: JSON.stringify({ ingredients, request: question, preferences }),

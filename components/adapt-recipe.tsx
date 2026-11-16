@@ -6,6 +6,7 @@ import type { Meal } from "@/lib/meals";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { SaveAiRecipe } from "@/components/save-ai-recipe";
 import type { AiRecipeDraft } from "@/lib/ai-recipes";
+import { trackedFetch } from "@/lib/api-telemetry";
 
 export function AdaptRecipe({ meal }: { meal: Meal }) {
   const [instruction, setInstruction] = useState("");
@@ -29,7 +30,7 @@ export function AdaptRecipe({ meal }: { meal: Meal }) {
       return;
     }
     try {
-      const response = await fetch("/api/recipes/adapt", {
+      const response = await trackedFetch("/api/recipes/adapt", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session.access_token}` },
         body: JSON.stringify({ meal, request: instruction, preferences: { minutes, people, goal } }),

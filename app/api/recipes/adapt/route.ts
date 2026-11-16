@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getIngredients, type Meal } from "@/lib/meals";
+import { withOperationHeaders } from "@/lib/api-operation-headers";
 
 export async function POST(request: NextRequest) {
   const apiKey = process.env.OPENROUTER_API_KEY;
@@ -43,8 +44,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Pasirinktas receptas neturi ingredientų arba gaminimo instrukcijos." }, { status: 400 });
   }
 
+  const endpoint = "https://openrouter.ai/api/v1/chat/completions";
+  const startedAt = performance.now();
+  let upstreamStatus: number | null = null;
+  const operation = (status: number | null, success: boolean) => ({ system: "OpenRouter", endpoint, method: "POST", status, success, durationMs: performance.now() - startedAt });
   try {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json", "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000", "X-Title": "Fridge Rescue" },
       body: JSON.stringify({
@@ -57,15 +62,17 @@ export async function POST(request: NextRequest) {
       }),
       signal: AbortSignal.timeout(30_000),
     });
+    upstreamStatus = response.status;
     const data = await response.json();
     if (!response.ok) {
       console.error("OpenRouter request failed", response.status, data?.error?.message);
-      return NextResponse.json({ error: "AI paslauga laikinai nepasiekiama. Pabandyk vėliau." }, { status: 502 });
+      return withOperationHeaders(NextResponse.json({ error: "AI paslauga laikinai nepasiekiama. Pabandyk vėliau." }, { status: 502 }), operation(upstreamStatus, false));
     }
     const answer = data.choices?.[0]?.message?.content;
     if (typeof answer !== "string" || !answer.trim()) throw new Error("Empty OpenRouter response");
-    return NextResponse.json({ answer: answer.trim() });
-  } catch {
-    return NextResponse.json({ error: "Nepavyko gauti AI pasiūlymo. Pabandyk dar kartą." }, { status: 502 });
+    return withOperationHeaders(NextResponse.json({ answer: answer.trim() }), operation(upstreamStatus, true));
+  } catch (cause) {
+    console.error("OpenRouter adaptation request failed", cause instanceof Error ? cause.message : String(cause));
+    return withOperationHeaders(NextResponse.json({ error: "Nepavyko gauti AI pasiūlymo. Pabandyk dar kartą." }, { status: 502 }), operation(upstreamStatus, false));
   }
 }

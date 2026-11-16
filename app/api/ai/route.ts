@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { withOperationHeaders } from "@/lib/api-operation-headers";
 
 export async function POST(request: NextRequest) {
   const apiKey = process.env.OPENROUTER_API_KEY;
@@ -27,8 +28,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Įrašyk klausimą (iki 500 simbolių); ingredientų sąrašas gali būti iki 300 simbolių." }, { status: 400 });
   }
 
+  const endpoint = "https://openrouter.ai/api/v1/chat/completions";
+  const startedAt = performance.now();
+  let upstreamStatus: number | null = null;
+  const operation = (status: number | null, success: boolean) => ({ system: "OpenRouter", endpoint, method: "POST", status, success, durationMs: performance.now() - startedAt });
   try {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -46,26 +51,29 @@ export async function POST(request: NextRequest) {
       }),
       signal: AbortSignal.timeout(30_000),
     });
+    upstreamStatus = response.status;
     const responseText = await response.text();
     let data: { error?: { message?: string }; choices?: Array<{ message?: { content?: unknown } }> };
     try {
       data = JSON.parse(responseText);
     } catch {
       console.error("OpenRouter returned a non-JSON response", response.status, response.headers.get("content-type"));
-      return NextResponse.json({ error: "OpenRouter grąžino netikėtą atsakymą. Daugiau informacijos yra serverio terminale." }, { status: 502 });
+      return withOperationHeaders(NextResponse.json({ error: "OpenRouter grąžino netikėtą atsakymą. Daugiau informacijos yra serverio terminale." }, { status: 502 }), operation(upstreamStatus, false));
     }
     if (!response.ok) {
       console.error("OpenRouter help request failed", response.status, data?.error?.message);
-      return NextResponse.json({ error: `OpenRouter atmetė užklausą (HTTP ${response.status}). Patikrink API raktą, modelį arba paskyros limitą.` }, { status: 502 });
+      return withOperationHeaders(NextResponse.json({ error: `OpenRouter atmetė užklausą (HTTP ${response.status}). Patikrink API raktą, modelį arba paskyros limitą.` }, { status: 502 }), operation(upstreamStatus, false));
     }
     const answer = data.choices?.[0]?.message?.content;
     if (typeof answer !== "string" || !answer.trim()) throw new Error("Empty OpenRouter response");
-    return NextResponse.json({ answer: answer.trim() });
+    return withOperationHeaders(NextResponse.json({ answer: answer.trim() }), operation(upstreamStatus, true));
   } catch (cause) {
     const name = cause instanceof Error ? cause.name : "UnknownError";
     const message = cause instanceof Error ? cause.message : String(cause);
     console.error("OpenRouter help request threw an error", name, message);
-    if (name === "TimeoutError") return NextResponse.json({ error: "OpenRouter neatsakė per 30 sekundžių. Pabandyk dar kartą." }, { status: 504 });
-    return NextResponse.json({ error: "Serveris negalėjo prisijungti prie OpenRouter. Patikrink interneto ryšį; išsami priežastis rodoma serverio terminale." }, { status: 502 });
+    const errorResponse = name === "TimeoutError"
+      ? NextResponse.json({ error: "OpenRouter neatsakė per 30 sekundžių. Pabandyk dar kartą." }, { status: 504 })
+      : NextResponse.json({ error: "Serveris negalėjo prisijungti prie OpenRouter. Patikrink interneto ryšį; išsami priežastis rodoma serverio terminale." }, { status: 502 });
+    return withOperationHeaders(errorResponse, operation(upstreamStatus, false));
   }
 }

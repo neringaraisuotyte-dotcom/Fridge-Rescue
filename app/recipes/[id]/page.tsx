@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { FavoriteButton } from "@/components/favorite-button";
 import { RecipeId } from "@/components/recipe-id";
 import { getIngredients, type Meal } from "@/lib/meals";
+import { trackedFetch } from "@/lib/api-telemetry";
 
 export default function RecipePage() {
   const params = useParams<{ id: string }>();
@@ -21,7 +22,7 @@ function RecipeDetails({ id }: { id: string }) {
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
-    fetch(`/api/meals/${encodeURIComponent(id)}`, { signal: controller.signal }).then(async (response) => {
+    trackedFetch(`/api/meals/${encodeURIComponent(id)}`, { signal: controller.signal }).then(async (response) => {
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "Nepavyko gauti recepto.");
       if (active) setMeal(payload.meal);

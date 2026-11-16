@@ -37,6 +37,10 @@ Email and password sign-up/sign-in are provided by Supabase Auth. If email confi
 - Next.js Route Handlers `/api/meals/search` and `/api/meals/[id]` call TheMealDB, validate inputs, and cache responses briefly.
 - The `/api/ai` and `/api/recipes/adapt` Route Handlers verify the user's Supabase session and call OpenRouter using the private API key. AI help follows the flow browser → `/api/ai` → OpenRouter → `/api/ai` → browser; the OpenRouter key is read only by the server.
 
+## Developer Mode
+
+Use the **🛠️ Developer Mode** toggle in the header to inspect the most recent API operation: service, endpoint, HTTP method and status, success, and approximate duration. The app records TheMealDB and OpenRouter upstream calls from its server routes and Supabase calls from the browser client. It stores operation metadata only in browser local storage; request bodies and API keys are not recorded. This project uses OpenRouter for AI, not Gemini.
+
 ## My AI recipes
 
 Run `supabase/migrations/20261116020000_create_ai_recipes.sql` in your Supabase project's **SQL Editor** before using AI recipe saving. It creates `ai_recipes` with owner-only SELECT/INSERT policies; anonymous access is disabled. No service-role key is needed.

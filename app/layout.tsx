@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { DeveloperMode } from "@/components/developer-mode";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <Link href="/account" className="account-link">Paskyra <span aria-hidden="true">↗</span></Link>
           </nav>
         </header>
+        <DeveloperMode />
         <main>{children}</main>
         <footer className="site-footer">Mažiau maisto švaistymo, daugiau skanių idėjų. <span>Receptų duomenys iš TheMealDB</span></footer>
       </body>

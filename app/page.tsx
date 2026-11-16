@@ -6,6 +6,7 @@ import { FormEvent, useState } from "react";
 import type { MealSummary } from "@/lib/meals";
 import { RecipeId } from "@/components/recipe-id";
 import { AiHelp } from "@/components/ai-help";
+import { trackedFetch } from "@/lib/api-telemetry";
 
 export default function HomePage() {
   const [query, setQuery] = useState("");
@@ -26,7 +27,7 @@ export default function HomePage() {
     setSubmittedMode(mode);
     setError("");
     try {
-      const response = await fetch(`/api/meals/search?q=${encodeURIComponent(query.trim())}&mode=${mode}`);
+      const response = await trackedFetch(`/api/meals/search?q=${encodeURIComponent(query.trim())}&mode=${mode}`);
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "Paieška nepavyko.");
       setMeals(payload.meals ?? []);

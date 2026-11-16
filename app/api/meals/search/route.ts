@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { MealSummary } from "@/lib/meals";
+import { withOperationHeaders } from "@/lib/api-operation-headers";
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q")?.trim();
@@ -11,13 +12,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Įrašyk paieškos žodį (iki 80 simbolių)." }, { status: 400 });
   }
 
+  const endpoint = /^\d+$/.test(query) ? "lookup.php?i=" : mode === "name" ? "search.php?s=" : "filter.php?i=";
+  const upstreamEndpoint = `https://www.themealdb.com/api/json/v1/1/${endpoint}${encodeURIComponent(query)}`;
+  const startedAt = performance.now();
+  let upstreamStatus: number | null = null;
+  const operation = (status: number | null, success: boolean) => ({ system: "TheMealDB", endpoint: upstreamEndpoint, method: "GET", status, success, durationMs: performance.now() - startedAt });
   try {
-    const endpoint = /^\d+$/.test(query) ? "lookup.php?i=" : mode === "name" ? "search.php?s=" : "filter.php?i=";
-    const response = await fetch(`https://www.themealdb.com/api/json/v1/1/${endpoint}${encodeURIComponent(query)}`, { next: { revalidate: 300 } });
-    if (!response.ok) throw new Error("TheMealDB returned an error");
+    const response = await fetch(upstreamEndpoint, { next: { revalidate: 300 } });
+    upstreamStatus = response.status;
+    if (!response.ok) return withOperationHeaders(NextResponse.json({ error: "Receptų paslauga laikinai nepasiekiama. Pabandyk dar kartą." }, { status: 502 }), operation(upstreamStatus, false));
     const data = await response.json() as { meals: MealSummary[] | null };
-    return NextResponse.json({ meals: (data.meals ?? []).map(({ idMeal, strMeal, strMealThumb }) => ({ idMeal, strMeal, strMealThumb })) });
+    return withOperationHeaders(NextResponse.json({ meals: (data.meals ?? []).map(({ idMeal, strMeal, strMealThumb }) => ({ idMeal, strMeal, strMealThumb })) }), operation(upstreamStatus, true));
   } catch {
-    return NextResponse.json({ error: "Receptų paslauga laikinai nepasiekiama. Pabandyk dar kartą." }, { status: 502 });
+    return withOperationHeaders(NextResponse.json({ error: "Receptų paslauga laikinai nepasiekiama. Pabandyk dar kartą." }, { status: 502 }), operation(upstreamStatus, false));
   }
 }
