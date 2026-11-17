@@ -37,18 +37,10 @@ export function AiHelp() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setBusy(true);
-    setError("");
-    setAnswer("");
-    setRecipes([]);
-    setDraft(null);
+    setBusy(true); setError(""); setAnswer(""); setRecipes([]); setDraft(null);
     const supabase = getSupabaseBrowserClient();
     const { data } = await supabase?.auth.getSession() ?? { data: { session: null } };
-    if (!data.session) {
-      setError("Prisijunk, kad galėtum gauti AI pagalbą.");
-      setBusy(false);
-      return;
-    }
+    if (!data.session) { setError("Prisijunk, kad galėtum gauti AI pagalbą."); setBusy(false); return; }
     try {
       const response = await trackedFetch("/api/ai", {
         method: "POST",
@@ -62,13 +54,11 @@ export function AiHelp() {
       if (payload.recipes?.length) setDraft({ user_id: data.session.user.id, original_recipe_name: payload.recipes.map((recipe: MealSummary) => recipe.strMeal).join(", "), original_recipe_id: payload.recipes.length === 1 ? payload.recipes[0].idMeal : null, user_request: question, parameters: { minutes, people, goal, ingredients, recipe_ids: payload.recipes.map((recipe: MealSummary) => recipe.idMeal) }, ai_result: payload.answer });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "AI pagalbos užklausa nepavyko.");
-    } finally {
-      setBusy(false);
-    }
+    } finally { setBusy(false); }
   }
 
   return <section className="ai-help-section" id="ai-help">
-    <div className="ai-help-intro"><p className="eyebrow">OPENROUTER VIRTUVĖS ASISTENTAS</p><h2>AI receptų gelbėtojas</h2><p>Parašyk, ką turi šaldytuve arba kokio patiekalo ieškai — AI parinks receptus iš „TheMealDB“ receptų knygos ir pateiks jų pavadinimus.</p></div>
+    <div className="ai-help-intro"><p className="eyebrow">OPENROUTER VIRTUVĖS ASISTENTAS</p><h2>AI receptų paieška</h2><p>Aprašyk, ko norėtum — AI pasiūlys receptų iš „TheMealDB“ kolekcijos. Receptų pagal išsaugotus produktus ieškok paskyros skiltyje <Link href="/account#my-kitchen">Mano virtuvė</Link>.</p></div>
     {!isSupabaseConfigured() && <div className="notice">AI pagalbai reikia Supabase paskyros ir OpenRouter API rakto. Sąrankos žingsniai pateikti README.</div>}
     <form className="ai-help-form" onSubmit={submit}>
       <div className="adapt-options">

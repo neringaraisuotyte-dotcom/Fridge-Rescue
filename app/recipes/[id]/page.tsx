@@ -40,7 +40,7 @@ function RecipeDetails({ id }: { id: string }) {
     <Link href="/" className="back-link">← Visi receptai</Link>
     <section className="recipe-hero">
       <div className="recipe-detail-image"><Image src={meal.strMealThumb} alt={meal.strMeal} fill priority sizes="(max-width: 760px) 100vw, 50vw" /></div>
-      <div className="recipe-detail-intro"><p className="eyebrow">THEMEALDB RECEPTAS</p><h1>{meal.strMeal}</h1><RecipeId id={meal.idMeal} /><dl className="recipe-metadata"><div><dt>Kategorija</dt><dd>{meal.strCategory || "Nenurodyta"}</dd></div><div><dt>Kilmės šalis arba regionas</dt><dd>{meal.strArea || "Nenurodyta"}</dd></div></dl><p className="recipe-description">Peržiūrėk ingredientus ir gaminimo eigą, o receptą pritaikyk pagal tai, ką turi namuose.</p><FavoriteButton meal={meal} />
+      <div className="recipe-detail-intro"><p className="eyebrow">THEMEALDB RECEPTAS</p><h1>{meal.strMeal}</h1><RecipeId id={meal.idMeal} /><dl className="recipe-metadata"><div><dt>Kategorija</dt><dd>{meal.strCategory || "Nenurodyta"}</dd></div><div><dt>Kilmės šalis arba regionas</dt><dd>{meal.strArea || "Nenurodyta"}</dd></div></dl><p className="recipe-description">Peržiūrėk ingredientus ir gaminimo eigą. Receptų pagal turimus produktus ieškok <Link href="/account#my-kitchen">Mano virtuvėje</Link>.</p><FavoriteButton meal={meal} />
         {meal.strTags && <div className="tag-list">{meal.strTags.split(",").map((tag) => <span key={tag}>{tag.trim()}</span>)}</div>}
       </div>
     </section>

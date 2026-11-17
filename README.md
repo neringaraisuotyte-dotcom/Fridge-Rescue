@@ -1,6 +1,6 @@
 ﻿# Fridge Rescue
 
-A Lithuanian recipe discovery app built with Next.js. Search TheMealDB, open a complete recipe, save favorites with Supabase, and get cooking help or recipe adaptations from OpenRouter AI.
+A Lithuanian recipe discovery app built with Next.js. Search TheMealDB, open complete recipes, save favorites with Supabase, and get recipe suggestions from your saved kitchen products using OpenRouter AI.
 
 ## Run locally
 
@@ -22,24 +22,24 @@ You can also search by a numeric TheMealDB recipe ID, such as `52772`. Copy an I
 3. In **SQL Editor**, run the migrations in order: `supabase/migrations/20261116000000_create_saved_recipes.sql`, `supabase/migrations/20261116010000_add_saved_recipe_category_and_note.sql`, `supabase/migrations/20261116020000_create_ai_recipes.sql`, then `supabase/migrations/20261117000000_create_kitchen_items.sql`.
 4. In **Authentication → URL Configuration**, set the Site URL to `http://localhost:3000` while developing.
 
-Email and password sign-up/sign-in are provided by Supabase Auth. If email confirmation is enabled, confirm the signup from the email before signing in. The saved-recipe and kitchen tables use Row Level Security so a user can only access their own rows. In **Paskyra → Mano virtuvė**, signed-in users can add and remove their saved products. Recipe adaptation sends those products with the selected recipe to OpenRouter and asks the AI to list what is available, what is missing, and possible substitutes. The signed-in user's recipes, title and category filters, category and note editor, and remove actions are available in **Paskyra → Mano išsaugoti receptai**.
+Email and password sign-up/sign-in are provided by Supabase Auth. If email confirmation is enabled, confirm the signup from the email before signing in. The saved-recipe and kitchen tables use Row Level Security so a user can only access their own rows. In **Paskyra → Mano virtuvė**, signed-in users can add and remove products, then ask AI to suggest TheMealDB recipes based on those products. The signed-in user's recipes, title and category filters, category and note editor, and remove actions are available in **Paskyra → Mano išsaugoti receptai**.
 
 ## Configure OpenRouter AI
 
 1. Create an API key in your OpenRouter account.
 2. Set `OPENROUTER_API_KEY` in `.env.local`. This is a server-only secret; never prefix it with `NEXT_PUBLIC_` or commit it.
 3. Optionally set `OPENROUTER_MODEL` to a model available in your OpenRouter account. If omitted, the server uses `openrouter/auto`.
-4. Homepage AI help and recipe adaptation require a signed-in Supabase user. The server verifies the user's access token before sending the question, ingredients, or recipe to OpenRouter. On a recipe page, the adaptation form sends the selected recipe's ID, name, ingredients, and original instructions automatically with the user's situation.
+4. Homepage AI help and kitchen-based recipe suggestions require a signed-in Supabase user. The server verifies the user's access token before sending the request to OpenRouter. Kitchen suggestions read products from Supabase with the user's JWT, so the browser cannot substitute another user's inventory.
 
 ## Where requests run
 
-Homepage **AI receptų gelbėtojas** selects up to three existing TheMealDB recipes. The server loads the recipe book by initial (cached for one hour), sends names and ingredient lists to OpenRouter, and validates the returned IDs against that book. Names and recipe links come from TheMealDB, not generated text. Empty matches show a no-results message; source failures do not fall back to invented recipes. Time and servings are not available in this catalogue and cannot be guaranteed. Saved suggestions retain the original names and source IDs. Recipe-page adaptation remains a separate feature.
+Homepage **AI receptų gelbėtojas** and **Mano virtuvė** recipe suggestions select up to three existing TheMealDB recipes. The server loads the recipe book by initial (cached for one hour), sends names and ingredient lists to OpenRouter, and validates the returned IDs against that book. Kitchen suggestions read the signed-in user's products from Supabase on the server. Names and recipe links come from TheMealDB, not generated text. Empty matches show a no-results message; source failures do not fall back to invented recipes. Time and servings are not available in this catalogue and cannot be guaranteed. Saved suggestions retain the original names and source IDs.
 
 Run selection and source-failure checks with `node tests/recipe-book.mjs`.
 
 - The browser renders the app and uses Supabase Auth and its publishable key for sign-in and row-level-protected saved recipes.
 - Next.js Route Handlers `/api/meals/search` and `/api/meals/[id]` call TheMealDB, validate inputs, and cache responses briefly.
-- The `/api/ai` and `/api/recipes/adapt` Route Handlers verify the user's Supabase session and call OpenRouter using the private API key. AI help follows the flow browser → `/api/ai` → OpenRouter → `/api/ai` → browser; the OpenRouter key is read only by the server.
+- The `/api/ai` Route Handler verifies the user's Supabase session and calls OpenRouter using the private API key. AI help and kitchen suggestions follow the flow browser → `/api/ai` → OpenRouter → `/api/ai` → browser; for kitchen suggestions, the route first reads the user's own products from Supabase using RLS. The OpenRouter key is read only by the server.
 
 ## Developer Mode
 
@@ -49,7 +49,7 @@ Use the **🛠️ Developer Mode** toggle in the header to inspect the most rece
 
 Run `supabase/migrations/20261116020000_create_ai_recipes.sql` in your Supabase project's **SQL Editor** before using AI recipe saving. It creates `ai_recipes` with owner-only SELECT/INSERT policies; anonymous access is disabled. No service-role key is needed.
 
-After generating an answer, signed-in users can click **Išsaugoti AI receptą** and find it in **Paskyra → Mano AI receptai**. The saved entry contains the original recipe name and ID (for recipe adaptations), the submitted request and parameters, the full AI result, user ID, and database creation timestamp. General AI help has no original recipe, so it is labeled **AI recepto idėja (be originalaus recepto)**. The saved request is a snapshot of the generation request; later edits to the form do not change it. Switching accounts hides the previous user's collection.
+After generating an answer, signed-in users can click **Išsaugoti AI receptą** and find it in **Paskyra → Mano AI receptai**. The saved entry contains suggested recipe names and IDs, the submitted request and parameters, the full AI result, user ID, and database creation timestamp. The saved request is a snapshot of the generation request; later edits to the form do not change it. Switching accounts hides the previous user's collection.
 
 ## Environment variables
 
@@ -57,7 +57,7 @@ After generating an answer, signed-in users can click **Išsaugoti AI receptą**
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Browser and server | For accounts and saved recipes / AI access |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Browser and server | For accounts and saved recipes / AI access |
-| `OPENROUTER_API_KEY` | Server only | For AI help and recipe adaptation |
+| `OPENROUTER_API_KEY` | Server only | For AI help and kitchen recipe suggestions |
 | `OPENROUTER_MODEL` | Server only | Optional model selection |
 | `NEXT_PUBLIC_APP_URL` | Server request metadata | Optional; defaults to `http://localhost:3000` |
 

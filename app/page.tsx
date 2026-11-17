@@ -71,7 +71,11 @@ export default function HomePage() {
           <div className="recipe-image"><Image src={meal.strMealThumb} alt={meal.strMeal} fill sizes="(max-width: 700px) 100vw, (max-width: 1000px) 50vw, 33vw" priority={index < 3} /><span className="card-arrow" aria-hidden="true">↗</span></div>
           <div className="recipe-card-info"><span className="card-kicker">THEMEALDB · RECEPTAS</span><h3>{meal.strMeal}</h3><span className="view-recipe">Peržiūrėti receptą <span aria-hidden="true">→</span></span></div>
         </Link><RecipeId id={meal.idMeal} /></article>)}</div>}
-        {!searched && <div className="welcome-cards"><article><span>01</span><h3>Ieškok ingredientu</h3><p>Pasirink produktą ir rask su juo susijusių patiekalų.</p></article><article><span>02</span><h3>Išsisaugok mėgstamus</h3><p>Sukurk savo asmeninę receptų kolekciją.</p></article><a href="#ai-help" className="welcome-card-link"><article><span>03</span><h3>Pritaikyk su AI</h3><p>Paprašyk OpenRouter padėti pritaikyti receptą.</p><span className="welcome-card-cta">Klausti AI →</span></article></a></div>}
+        {!searched && <div className="welcome-cards">
+          <a href="#meal-search" className="welcome-card-link welcome-card-link-green"><article><span>01</span><h3>Ieškok receptų</h3><p>Rask patiekalų pagal ingredientą, pavadinimą arba ID.</p><span className="welcome-card-cta">Pradėti paiešką →</span></article></a>
+          <Link href="/account#my-saved-recipes" className="welcome-card-link welcome-card-link-orange"><article><span>02</span><h3>Išsisaugok mėgstamus</h3><p>Sukurk savo asmeninę receptų kolekciją.</p><span className="welcome-card-cta">Mano receptai →</span></article></Link>
+          <a href="#ai-help" className="welcome-card-link"><article><span>03</span><h3>Ieškok su AI</h3><p>Aprašyk, ką turi ar ko norėtum — AI pasiūlys receptų iš TheMealDB.</p><span className="welcome-card-cta">AI receptų paieška →</span></article></a>
+        </div>}
       </section>
       <AiHelp />
     </>
