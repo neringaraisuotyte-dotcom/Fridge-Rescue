@@ -58,7 +58,7 @@ export function AiHelp() {
   }
 
   return <section className="ai-help-section" id="ai-help">
-    <div className="ai-help-intro"><p className="eyebrow">OPENROUTER VIRTUVĖS ASISTENTAS</p><h2>AI receptų gelbėtojas</h2><p>Parašyk, ką turi šaldytuve arba kokio patiekalo ieškai — AI parinks receptus iš „TheMealDB“ receptų knygos ir pateiks jų pavadinimus.</p></div>
+    <div className="ai-help-intro"><p className="eyebrow">OPENROUTER VIRTUVĖS ASISTENTAS</p><h2>AI receptų gelbėtojas</h2></div>
     {!isSupabaseConfigured() && <div className="notice">AI pagalbai reikia Supabase paskyros ir OpenRouter API rakto. Sąrankos žingsniai pateikti README.</div>}
     <form className="ai-help-form" onSubmit={submit}>
       <div className="adapt-options">
