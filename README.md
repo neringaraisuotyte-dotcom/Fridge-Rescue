@@ -33,6 +33,10 @@ Email and password sign-up/sign-in are provided by Supabase Auth. If email confi
 
 ## Where requests run
 
+Homepage **AI receptų gelbėtojas** selects up to three existing TheMealDB recipes. The server loads the recipe book by initial (cached for one hour), sends names and ingredient lists to OpenRouter, and validates the returned IDs against that book. Names and recipe links come from TheMealDB, not generated text. Empty matches show a no-results message; source failures do not fall back to invented recipes. Time and servings are not available in this catalogue and cannot be guaranteed. Saved suggestions retain the original names and source IDs. Recipe-page adaptation remains a separate feature.
+
+Run selection and source-failure checks with `node tests/recipe-book.mjs`.
+
 - The browser renders the app and uses Supabase Auth and its publishable key for sign-in and row-level-protected saved recipes.
 - Next.js Route Handlers `/api/meals/search` and `/api/meals/[id]` call TheMealDB, validate inputs, and cache responses briefly.
 - The `/api/ai` and `/api/recipes/adapt` Route Handlers verify the user's Supabase session and call OpenRouter using the private API key. AI help follows the flow browser → `/api/ai` → OpenRouter → `/api/ai` → browser; the OpenRouter key is read only by the server.

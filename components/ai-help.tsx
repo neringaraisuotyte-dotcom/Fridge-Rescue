@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { SaveAiRecipe } from "@/components/save-ai-recipe";
+import type { MealSummary } from "@/lib/meals";
 import type { AiRecipeDraft } from "@/lib/ai-recipes";
 import { trackedFetch } from "@/lib/api-telemetry";
 
@@ -19,6 +20,7 @@ export function AiHelp() {
     people ? `Gaminsiu ${people} žmonėms.` : "",
     goal ? `Norimas rezultatas: ${goal}.` : "",
   ].filter(Boolean).join(" ");
+  const [recipes, setRecipes] = useState<MealSummary[]>([]);
   const [answer, setAnswer] = useState("");
   const [draft, setDraft] = useState<AiRecipeDraft | null>(null);
   const [error, setError] = useState("");
@@ -38,6 +40,7 @@ export function AiHelp() {
     setBusy(true);
     setError("");
     setAnswer("");
+    setRecipes([]);
     setDraft(null);
     const supabase = getSupabaseBrowserClient();
     const { data } = await supabase?.auth.getSession() ?? { data: { session: null } };
@@ -55,7 +58,8 @@ export function AiHelp() {
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "AI pagalbos užklausa nepavyko.");
       setAnswer(payload.answer);
-      setDraft({ user_id: data.session.user.id, original_recipe_name: "AI recepto idėja (be originalaus recepto)", original_recipe_id: null, user_request: question, parameters: { minutes, people, goal, ingredients }, ai_result: payload.answer });
+      setRecipes(payload.recipes ?? []);
+      if (payload.recipes?.length) setDraft({ user_id: data.session.user.id, original_recipe_name: payload.recipes.map((recipe: MealSummary) => recipe.strMeal).join(", "), original_recipe_id: payload.recipes.length === 1 ? payload.recipes[0].idMeal : null, user_request: question, parameters: { minutes, people, goal, ingredients, recipe_ids: payload.recipes.map((recipe: MealSummary) => recipe.idMeal) }, ai_result: payload.answer });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "AI pagalbos užklausa nepavyko.");
     } finally {
@@ -64,7 +68,7 @@ export function AiHelp() {
   }
 
   return <section className="ai-help-section" id="ai-help">
-    <div className="ai-help-intro"><p className="eyebrow">OPENROUTER VIRTUVĖS ASISTENTAS</p><h2>AI receptų gelbėtojas</h2><p>Parašyk, ką turi šaldytuve arba ko norėtum sužinoti — AI pasiūlys idėjų ir patarimų.</p></div>
+    <div className="ai-help-intro"><p className="eyebrow">OPENROUTER VIRTUVĖS ASISTENTAS</p><h2>AI receptų gelbėtojas</h2><p>Parašyk, ką turi šaldytuve arba kokio patiekalo ieškai — AI parinks receptus iš „TheMealDB“ receptų knygos ir pateiks jų pavadinimus.</p></div>
     {!isSupabaseConfigured() && <div className="notice">AI pagalbai reikia Supabase paskyros ir OpenRouter API rakto. Sąrankos žingsniai pateikti README.</div>}
     <form className="ai-help-form" onSubmit={submit}>
       <div className="adapt-options">
@@ -73,12 +77,12 @@ export function AiHelp() {
         <fieldset disabled={busy}><legend>Ko noriu?</legend><div>{["paprasčiau", "pigiau", "sveikiau", "kuo panašiau į originalą"].map((value) => <button type="button" key={value} aria-pressed={goal === value} onClick={() => setGoal(goal === value ? "" : value)}>{value}</button>)}</div></fieldset>
       </div>
       <label>Turimi ingredientai <span>(nebūtina)</span><input value={ingredients} onChange={(event) => setIngredients(event.target.value)} maxLength={300} placeholder="Pvz., chicken, rice, spinach" /></label>
-      <label>Kuo galiu padėti?<textarea value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={500} required={!preferences} placeholder="Pvz., ką galėčiau pagaminti per 20 minučių?" /></label>
-      <div className="ai-help-footer"><span>{question.length}/500</span><button className="button-primary" disabled={busy || !(question.trim() || preferences)}>{busy ? "Ruošiu atsakymą…" : "Paklausti OpenRouter AI"}<span aria-hidden="true"> ✦</span></button></div>
+      <label>Kuo galiu padėti?<textarea value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={500} required={!preferences && !ingredients.trim()} placeholder="Pvz., ką galėčiau pagaminti per 20 minučių?" /></label>
+      <div className="ai-help-footer"><span>{question.length}/500</span><button className="button-primary" disabled={busy || !(question.trim() || preferences || ingredients.trim())}>{busy ? "Ruošiu atsakymą…" : "Rasti receptus knygoje"}<span aria-hidden="true"> ✦</span></button></div>
     </form>
     {signedIn && !answer && <p className="ai-help-auth">Gavęs AI atsakymą, galėsi spausti „Išsaugoti AI receptą“. Jį rasi skiltyje <Link href="/account#my-ai-recipes">Mano AI receptai</Link>.</p>}
     {!signedIn && isSupabaseConfigured() && <p className="ai-help-auth">Norint siųsti klausimą, reikia <Link href="/account">prisijungti prie paskyros</Link>.</p>}
     {error && <div className="notice error-notice" role="alert">{error} {error.includes("Prisijunk") && <Link href="/account">Prisijungti →</Link>}</div>}
-    {answer && <div className="ai-answer"><p className="eyebrow">AI ATSAKYMAS</p><div>{answer}</div><p className="ai-disclaimer">AI pasiūlymą įvertink prieš gamindamas, ypač jei jis susijęs su alergijomis.</p>{draft && <SaveAiRecipe draft={draft} />}</div>}
+    {answer && <div className="ai-answer"><p className="eyebrow">AI ATSAKYMAS</p><div>{answer}</div>{recipes.length > 0 && <ul>{recipes.map((recipe) => <li key={recipe.idMeal}><Link href={`/recipes/${encodeURIComponent(recipe.idMeal)}`}>{recipe.strMeal} →</Link></li>)}</ul>}<p className="ai-disclaimer">AI pasiūlymą įvertink prieš gamindamas, ypač jei jis susijęs su alergijomis.</p>{draft && <SaveAiRecipe draft={draft} />}</div>}
   </section>;
 }
