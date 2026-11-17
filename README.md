@@ -33,7 +33,7 @@ Email and password sign-up/sign-in are provided by Supabase Auth. If email confi
 
 ## Where requests run
 
-Homepage **AI receptų gelbėtojas** and **Mano virtuvė** recipe suggestions select up to three existing TheMealDB recipes. The server loads the recipe book by initial (cached for one hour), sends names and ingredient lists to OpenRouter, and validates the returned IDs against that book. Kitchen suggestions read the signed-in user's products from Supabase on the server. Names and recipe links come from TheMealDB, not generated text. Empty matches show a no-results message; source failures do not fall back to invented recipes. Time and servings are not available in this catalogue and cannot be guaranteed. Saved suggestions retain the original names and source IDs.
+Homepage **AI receptų gelbėtojas** selects up to three existing TheMealDB recipes. The server loads the recipe book by initial (cached for one hour), sends names and ingredient lists to OpenRouter, and validates the returned IDs against that book. Names and recipe links come from TheMealDB, not generated text. Empty matches show a no-results message; source failures do not fall back to invented recipes. Time and servings are not available in this catalogue and cannot be guaranteed. Saved suggestions retain the original names and source IDs. Recipe-page adaptation remains a separate feature.
 
 Run selection and source-failure checks with `node tests/recipe-book.mjs`.
 
