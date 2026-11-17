@@ -12,9 +12,22 @@ export async function POST(request: NextRequest) {
 
   const accessToken = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
   if (!accessToken) return NextResponse.json({ error: "Prisijunk, kad galėtum pritaikyti receptą." }, { status: 401 });
-  const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
+  const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false }, global: { headers: { Authorization: `Bearer ${accessToken}` } } });
   const { data: { user }, error: authError } = await supabase.auth.getUser(accessToken);
   if (authError || !user) return NextResponse.json({ error: "Sesija nebegalioja. Prisijunk iš naujo." }, { status: 401 });
+
+  // Read the kitchen with the user's JWT so Supabase RLS remains the authority
+  // for which products this request can see.
+  const { data: kitchenRows, error: kitchenError } = await supabase
+    .from("kitchen_items")
+    .select("name")
+    .eq("user_id", user.id)
+    .order("name");
+  if (kitchenError) {
+    console.error("Could not read user's kitchen", kitchenError.message);
+    return NextResponse.json({ error: "Nepavyko gauti tavo virtuvės produktų. Patikrink Supabase migraciją." }, { status: 503 });
+  }
+  const kitchenItems = (kitchenRows ?? []).map((item) => item.name);
 
   let body: { meal?: Meal; request?: unknown; preferences?: { minutes?: unknown; people?: unknown; goal?: unknown } };
   try {
@@ -56,8 +69,8 @@ export async function POST(request: NextRequest) {
         model: process.env.OPENROUTER_MODEL || "openrouter/auto",
         max_tokens: 1600,
         messages: [
-          { role: "system", content: "Esi Fridge Rescue receptų gelbėtojas. Pagal vartotojo situaciją paruošk pilną, aiškų ir praktišką pasirinkto recepto variantą lietuviškai. Būtinai pritaikyk ingredientų kiekius žmonių skaičiui, pasiūlyk trūkstamų produktų pakaitalus, atsižvelk į nurodytą laiką ir pageidaujamą aštrumą. Naudok originalias instrukcijas kaip pagrindą, bet pakeisk jas pagal situaciją. Neapsiribok bendru patarimu — pateik ingredientus ir žingsnis po žingsnio gaminimo eigą. Atsakymą struktūruok antraštėmis: „Pritaikytas receptas“, „Ingredientai“, „Gaminimo eiga“, „Laikas ir porcijos“, „Kas pakeista“. Jei trūksta duomenų kiekiams apskaičiuoti, aiškiai tai pasakyk. Jei prašymas susijęs su alergija, primink patikrinti etiketes ir kryžminę taršą; neteik medicininių garantijų." },
-          { role: "user", content: JSON.stringify({ original_recipe: { id: meal.idMeal, name: meal.strMeal, category: meal.strCategory, cuisine: meal.strArea, ingredients, original_instructions: meal.strInstructions.slice(0, 5000) }, user_situation: instruction, selected_preferences: selectedPreferences }) },
+          { role: "system", content: "Esi Fridge Rescue receptų gelbėtojas. Pagal vartotojo situaciją paruošk pilną, aiškų ir praktišką pasirinkto recepto variantą lietuviškai. Palygink recepto ingredientus su vartotojo Mano virtuvės produktų sąrašu. Aiškiai išvardyk, ką vartotojas jau turi, ko trūksta ir kokiais produktais galima pakeisti trūkstamus ingredientus. Nelaikyk produkto turimu, jei jis nėra pateiktas Mano virtuvės sąraše. Jei sąrašas tuščias, pasakyk, kad virtuvės produktų nėra nurodyta. Būtinai pritaikyk ingredientų kiekius žmonių skaičiui, atsižvelk į nurodytą laiką ir pageidaujamą tikslą. Naudok originalias instrukcijas kaip pagrindą, bet pakeisk jas pagal situaciją. Pateik ingredientus ir žingsnis po žingsnio gaminimo eigą. Atsakymą struktūruok antraštėmis: „Pritaikytas receptas“, „Ką jau turi“, „Ko trūksta“, „Galimi pakaitalai“, „Ingredientai“, „Gaminimo eiga“, „Laikas ir porcijos“, „Kas pakeista“. Jei trūksta duomenų kiekiams apskaičiuoti, aiškiai tai pasakyk. Jei prašymas susijęs su alergija, primink patikrinti etiketes ir kryžminę taršą; neteik medicininių garantijų." },
+          { role: "user", content: JSON.stringify({ original_recipe: { id: meal.idMeal, name: meal.strMeal, category: meal.strCategory, cuisine: meal.strArea, ingredients, original_instructions: meal.strInstructions.slice(0, 5000) }, my_kitchen_products: kitchenItems, user_situation: instruction, selected_preferences: selectedPreferences }) },
         ],
       }),
       signal: AbortSignal.timeout(30_000),
