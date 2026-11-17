@@ -19,10 +19,10 @@ You can also search by a numeric TheMealDB recipe ID, such as `52772`. Copy an I
 
 1. Create a Supabase project.
 2. In **Project Settings → API**, copy the Project URL and publishable key into `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `.env.local`.
-3. In **SQL Editor**, run the migrations in order: `supabase/migrations/20261116000000_create_saved_recipes.sql`, then `supabase/migrations/20261116010000_add_saved_recipe_category_and_note.sql`.
+3. In **SQL Editor**, run the migrations in order: `supabase/migrations/20261116000000_create_saved_recipes.sql`, `supabase/migrations/20261116010000_add_saved_recipe_category_and_note.sql`, `supabase/migrations/20261116020000_create_ai_recipes.sql`, then `supabase/migrations/20261117000000_create_kitchen_items.sql`.
 4. In **Authentication → URL Configuration**, set the Site URL to `http://localhost:3000` while developing.
 
-Email and password sign-up/sign-in are provided by Supabase Auth. If email confirmation is enabled, confirm the signup from the email before signing in. The saved-recipe table uses Row Level Security so a user can only see, add, update, or remove their own saved recipes. The signed-in user's recipes, title and category filters, category and note editor, and remove actions are all available in **Paskyra → Mano išsaugoti receptai**.
+Email and password sign-up/sign-in are provided by Supabase Auth. If email confirmation is enabled, confirm the signup from the email before signing in. The saved-recipe and kitchen tables use Row Level Security so a user can only access their own rows. In **Paskyra → Mano virtuvė**, signed-in users can add and remove their saved products. Recipe adaptation sends those products with the selected recipe to OpenRouter and asks the AI to list what is available, what is missing, and possible substitutes. The signed-in user's recipes, title and category filters, category and note editor, and remove actions are available in **Paskyra → Mano išsaugoti receptai**.
 
 ## Configure OpenRouter AI
 
