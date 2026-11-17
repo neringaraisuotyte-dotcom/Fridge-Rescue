@@ -38,7 +38,6 @@ export function AiHelp() {
     setBusy(true);
     setError("");
     setAnswer("");
-    setRecipes([]);
     setDraft(null);
     const supabase = getSupabaseBrowserClient();
     const { data } = await supabase?.auth.getSession() ?? { data: { session: null } };
